@@ -16,9 +16,9 @@ function main() {
     local is_first=true
     for tz in "${tz_csv[@]}"; do
         if [[ "$is_first" == true ]]; then
-            printf "${main_style}"
+            printf "${main_style:-#[fg=default]}"
         else
-            printf "#[fg=default] | ${sec_style}"
+            printf "#[fg=default] | ${sec_style:-[#fg=default]}"
         fi
 
         local t=$( TZ="${tz}" date +"${time_fmt}${date_fmt}" )
