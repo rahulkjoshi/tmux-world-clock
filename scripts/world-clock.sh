@@ -18,7 +18,7 @@ function main() {
         if [[ "$is_first" == true ]]; then
             printf "${main_style:-#[fg=default]}"
         else
-            printf "#[fg=default] | ${sec_style:-[#fg=default]}"
+            printf "#[fg=default] | ${sec_style:-#[fg=default]}"
         fi
 
         local t=$( TZ="${tz}" date +"${time_fmt}${date_fmt}" )
