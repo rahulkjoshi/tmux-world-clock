@@ -1,5 +1,5 @@
 #! /usr/bin/env bash
-# vi: ft=bash
+#! vi: ft=bash
 
 function main() {
     local tz_csv
