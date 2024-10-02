@@ -3,34 +3,54 @@
 
 function main() {
     local tz_csv
+    # shellcheck disable=SC2207 # IFS set correctly
     IFS="," tz_csv=( $( tmux show -gqv "@world_clock_tzs" ) ); unset IFS;
 
-    local default_style="#[fg=default bg=default]"
+    local pri_style
+    pri_style=$( tmux show -gqv "@world_clock_pri_style" )
+    pri_style="${pri_style:-#[default]}"
+    local sec_style
+    sec_style=$( tmux show -gqv "@world_clock_sec_style" )
+    sec_style="${sec_style:-#[default]}"
+    local date_style
+    date_style=$( tmux show -gqv "@world_clock_date_style" )
+    date_style="${date_style:-#[default]}"
 
-    local pri_style=$( tmux show -gqv "@world_clock_pri_style" )
-    pri_style="${pri_style:-${default_style}}"
-    local sec_style=$( tmux show -gqv "@world_clock_sec_style" )
-    sec_style="${sec_style:-${default_style}}"
-    local date_style=$( tmux show -gqv "@world_clock_date_style" )
-    date_style="${date_style:-${default_style}}"
+    local date_fmt
+    date_fmt=$( tmux show -gqv "@world_clock_date_fmt" )
+    local time_fmt
+    time_fmt=$( tmux show -gqv "@world_clock_time_fmt" )
 
-    local date_fmt=$( tmux show -gqv "@world_clock_date_fmt" )
-    local time_fmt=$( tmux show -gqv "@world_clock_time_fmt" )
+    local pri_sep
+    pri_sep=$( tmux show -gqv "@world_clock_pri_sep" )
+    pri_sep="${pri_sep:-#[default]|}"
+    local time_sep
+    time_sep=$( tmux show -gqv "@world_clock_time_sep" )
+    time_sep="${time_sep:-#[default]|}"
+    local date_sep
+    date_sep=$( tmux show -gqv "@world_clock_date_sep" )
+    date_sep="${date_sep:-#[default]|}"
 
-    local is_first=true
-    for tz in "${tz_csv[@]}"; do
-        if [[ "$is_first" == true ]]; then
-            printf "${pri_style}"
-            is_first=false
+    local last_idx=$(( ${#tz_csv[@]}-1 ))
+    for i in "${!tz_csv[@]}"; do
+        tz="${tz_csv[$i]}"
+        if (( i == 0 )); then
+            echo -n "${pri_style} "
         else
-            printf "#[fg=default] | ${sec_style}"
+            echo -n "${sec_style} "
         fi
 
-        printf "$( TZ="${tz}" date +"${time_fmt}" )"
+        echo -n "$( TZ="${tz}" date +"${time_fmt} " )"
+
+        if (( i == 0 )); then
+            echo -n "${pri_sep}"
+        elif (( i != last_idx )); then
+            echo -n "${time_sep}"
+        fi
     done
-    printf  "#[fg=default] | ${date_style}"
-    printf "$( TZ="${tz}" date +"${date_fmt}" )"
-    printf "${default_style}"
+    echo -n  "${date_sep}${date_style} "
+    echo -n "$( TZ="${tz}" date +"${date_fmt} " )"
+    echo -n "#[default]"
 }
 
 main
